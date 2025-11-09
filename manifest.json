@@ -1,0 +1,16 @@
+{
+  "name": "RunLog",
+  "short_name": "RunLog",
+  "description": "運行管理アプリ (LANログ) - 走行、積載、給油などの記録をサポートします",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ff8800",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc5NicgaGVpZ2h0PSc5Nic+PHJlY3Qgd2lkdGg9Jzk2JyBoZWlnaHQ9Jzk2JyBmaWxsPSclMjNmZjg4MDAnLz48dGV4dCB4PSc1MCUnIHk9JzU1JScgZm9udC1zaXplPSc1MCcgdGV4dC1hbmNob3I9J21pZGRsZScgZG9taW5hbnQtYmFzZWxpbmU9J21pZGRsZScgZmlsbD0nd2hpdGUnPvCfmpo8L3RleHQ+PC9zdmc+",
+      "sizes": "96x96",
+      "type": "image/svg+xml"
+    }
+  ]
+}
