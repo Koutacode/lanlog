@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RunLog - LANログ</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ff8800">
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fafafa; }
+    header { background: #ff8800; color: #fff; padding: 1rem; text-align: center; }
+    main { padding: 1rem; }
+    form { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+    label { display: flex; flex-direction: column; font-size: 0.9rem; }
+    input { padding: 0.4rem; font-size: 1rem; }
+    button { padding: 0.5rem; font-size: 1rem; background: #ff8800; color: #fff; border: none; cursor: pointer; border-radius: 4px; }
+    button:hover { opacity: 0.9; }
+    .log { background: #fff; padding: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>RunLog - LANログ</h1>
+  </header>
+  <main>
+    <form id="logForm">
+      <label>日付:
+        <input type="date" id="date" required>
+      </label>
+      <label>走行距離 (km):
+        <input type="number" id="distance" step="0.1" required>
+      </label>
+      <label>積載重量 (t):
+        <input type="number" id="weight" step="0.1" required>
+      </label>
+      <label>燃料 (L):
+        <input type="number" id="fuel" step="0.1" required>
+      </label>
+      <label>経費 (円):
+        <input type="number" id="cost" step="1" required>
+      </label>
+      <label>メモ:
+        <input type="text" id="memo">
+      </label>
+      <button type="submit">保存</button>
+    </form>
+    <section id="logs"></section>
+  </main>
+  <script>
+    // Register service worker for offline support
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js').catch(function(err) { console.error('Service Worker registration failed:', err); });
+    }
+    const form = document.getElementById('logForm');
+    const logsContainer = document.getElementById('logs');
+    function loadLogs() {
+      const logs = JSON.parse(localStorage.getItem('runLogs') || '[]');
+      logsContainer.innerHTML = '';
+      logs.forEach((log, index) => {
+        const div = document.createElement('div');
+        div.className = 'log';
+        div.innerHTML = `<strong>${log.date}</strong>: 距離${log.distance}km, 重量${log.weight}t, 燃料${log.fuel}L, 経費${log.cost}円, メモ: ${log.memo} <button data-index='${index}'>削除</button>`;
+        logsContainer.appendChild(div);
+      });
+    }
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const log = {
+        date: document.getElementById('date').value,
+        distance: document.getElementById('distance').value,
+        weight: document.getElementById('weight').value,
+        fuel: document.getElementById('fuel').value,
+        cost: document.getElementById('cost').value,
+        memo: document.getElementById('memo').value
+      };
+      const logs = JSON.parse(localStorage.getItem('runLogs') || '[]');
+      logs.push(log);
+      localStorage.setItem('runLogs', JSON.stringify(logs));
+      form.reset();
+      loadLogs();
+    });
+    logsContainer.addEventListener('click', (e) => {
+      if (e.target.tagName === 'BUTTON') {
+        const idx = e.target.getAttribute('data-index');
+        const logs = JSON.parse(localStorage.getItem('runLogs') || '[]');
+        logs.splice(idx, 1);
+        localStorage.setItem('runLogs', JSON.stringify(logs));
+        loadLogs();
+      }
+    });
+    loadLogs();
+  </script>
+</body>
+</html>
