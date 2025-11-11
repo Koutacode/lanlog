@@ -3,70 +3,290 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RunLog - LANログ</title>
+  <title>RunLog PWA</title>
+  <!-- Web App Manifest -->
   <link rel="manifest" href="manifest.json">
+  <!-- Theme color for mobile status bar -->
   <meta name="theme-color" content="#ff8800">
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fafafa; }
-    header { background: #ff8800; color: #fff; padding: 1rem; text-align: center; }
-    main { padding: 1rem; }
-    form { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
-    label { display: flex; flex-direction: column; font-size: 0.9rem; }
-    input { padding: 0.4rem; font-size: 1rem; }
-    button { padding: 0.5rem; font-size: 1rem; background: #ff8800; color: #fff; border: none; cursor: pointer; border-radius: 4px; }
-    button:hover { opacity: 0.9; }
-    .log { background: #fff; padding: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; }
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f7f7f7;
+      color: #333;
+    }
+    header {
+      background: #ff8800;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    main {
+      padding: 1rem;
+    }
+    form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem 1rem;
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1rem;
+    }
+    form label {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.9rem;
+    }
+    form input {
+      margin-top: 0.25rem;
+      padding: 0.4rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    form button {
+      grid-column: span 2;
+      padding: 0.6rem;
+      font-size: 1rem;
+      background: #ff8800;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    form button:hover {
+      opacity: 0.9;
+    }
+    #nav-controls {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    #nav-controls input {
+      flex: 1;
+      padding: 0.4rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #nav-controls button {
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      background: #3367d6;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #summary {
+      background: white;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      mground: white;
+      padding: 0.75rem;
+      border-radius: 6px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+    }
+    .log button {
+      margin-left: 0.5rem;
+      background: #e74c3c;
+      border: none;
+      color: white;
+      padding: 0.3rem 0.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .log button:hover {
+      opacity: 0.85;
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>RunLog - LANログ</h1>
+    <h1>RunLog</h1>
   </header>
   <main>
+    <!-- Log entry form -->
     <form id="logForm">
-      <label>日付:
+      <label>日付
         <input type="date" id="date" required>
       </label>
-      <label>走行距離 (km):
+      <label>出発地
+        <input type="text" id="start" required placeholder="例: 札幌">
+      </label>
+      <label>到着地
+        <input type="text" id="destination" required placeholder="例: 小樽">
+      </label>
+      <label>距離 (km)
         <input type="number" id="distance" step="0.1" required>
       </label>
-      <label>積載重量 (t):
-        <input type="number" id="weight" step="0.1" required>
+      <label>積載重量 (t)
+        <input type="number" id="weight" step="0.1">
       </label>
-      <label>燃料 (L):
-        <input type="number" id="fuel" step="0.1" required>
+      <label>燃料 (L)
+        <input type="number" id="fuel" step="0.1">
       </label>
-      <label>経費 (円):
-        <input type="number" id="cost" step="1" required>
+      <label>経費 (円)
+        <input type="number" id="cost" step="1">
       </label>
-      <label>メモ:
+      <label>メモ
         <input type="text" id="memo">
       </label>
       <button type="submit">保存</button>
     </form>
-    <section id="logs"></section>
+    <!-- Navigation controls -->
+    <div id="nav-controls">
+      <input type="text" id="navDestination" placeholder="ナビ目的地 (省略可)">
+      <button id="navBtn">ナビリンク生成</button>
+    </div>
+    <!-- Task controls -->
+    <div id="taskControls">
+      <button id="loadBtn">積み込み開始</button>
+      <button id="breakBtn">休憩開始</button>
+      <button id="restBtn">休息開始</button>
+      <button id="shipBtn">乗船開始</button>
+      <button id="fuelBtn">給油開始</button>
+    </div>
+    <!-- Summary -->
+    <div id="summary"></div>
+    <!-- Logs list -->
+    <div id="logs"></div>
   </main>
   <script>
     // Register service worker for offline support
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js').catch(function(err) { console.error('Service Worker registration failed:', err); });
+      navigator.serviceWorker.register('service-worker.js').catch(err => console.error('SW registration failed:', err));
     }
+    // DOM elements
     const form = document.getElementById('logForm');
     const logsContainer = document.getElementById('logs');
+    const summaryEl = document.getElementById('summary');
+    const navBtn = document.getElementById('navBtn');
+    const navInput = document.getElementById('navDestination');
+    // Setup generic task buttons for various activities
+    function setupTaskButton(btnId, taskName) {
+      const btn = document.getElementById(btnId);
+      const state = { started: false, startTime: null, startLocation: null };
+      btn.addEventListener('click', () => {
+        if (!state.started) {
+          // Start the task
+          state.started = true;
+          btn.textContent = taskName + '終了';
+          state.startTime = new Date().toISOString();
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+              state.startLocation = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+            });
+          }
+        } else {
+          // End the task
+          const endTime = new Date().toISOString();
+          let endLocation = null;
+          const finalize = () => {
+            const logs = JSON.parse(localStorage.getItem('runLogs') || '[]');
+            logs.push({
+              task: taskName,
+              startTime: state.startTime,
+              endTime: endTime,
+              startLocation: state.startLocation,
+              endLocation: endLocation
+            });
+            localStorage.setItem('runLogs', JSON.stringify(logs));
+            loadLogs();
+            state.started = false;
+            state.startTime = null;
+            state.startLocation = null;
+            btn.textContent = taskName + '開始';
+          };
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+              endLocation = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+              finalize();
+            }, err => finalize());
+          } else {
+            finalize();
+          }
+        }
+      });
+    }
+    // Initialize task buttons
+    setupTaskButton('loadBtn', '積み込み');
+    setupTaskButton('breakBtn', '休憩');
+    setupTaskButton('restBtn', '休息');
+    setupTaskButton('shipBtn', '乗船');
+    setupTaskButton('fuelBtn', '給油');
+
+    // Load existing logs from localStorage
     function loadLogs() {
       const logs = JSON.parse(localStorage.getItem('runLogs') || '[]');
       logsContainer.innerHTML = '';
       logs.forEach((log, index) => {
         const div = document.createElement('div');
         div.className = 'log';
-        div.innerHTML = `<strong>${log.date}</strong>: 距離${log.distance}km, 重量${log.weight}t, 燃料${log.fuel}L, 経費${log.cost}円, メモ: ${log.memo} <button data-index='${index}'>削除</button>`;
+        if (log.task) {
+          const start = log.startTime ? new Date(log.startTime).toLocaleString() : '-';
+          const end = log.endTime ? new Date(log.endTime).toLocaleString() : '-';
+          const startLoc = (log.startLocation && log.startLocation.lat) ? (log.startLocation.lat.toFixed(5) + ',' + log.startLocation.lon.toFixed(5)) : '-';
+          const endLoc = (log.endLocation && log.endLocation.lat) ? (log.endLocation.lat.toFixed(5) + ',' + log.endLocation.lon.toFixed(5)) : '-';
+          div.innerHTML = `
+            <div><strong>${log.task}</strong>: ${start} - ${end}</div>
+            <div>開始位置: ${startLoc}, 終了位置: ${endLoc}</div>
+            <button data-index="${index}">削除</button>
+          `;
+        } else {
+          div.innerHTML = `
+          <div><strong>${log.date}</strong> ${log.start} → ${log.destination}</div>
+          <div>距離: ${log.distance}km, 重量: ${log.weight || '-'}t, 燃料: ${log.fuel || '-'}L, 経費: ${log.cost || '-'}円</div>
+          <div>メモ: ${log.memo || ''}</div>
+          <button data-index="${index}">削除</button>
+          `;
+        }
         logsContainer.appendChild(div);
       });
+      updateSummary(logs);
     }
-    form.addEventListener('submit', (e) => {
+
+    // Update summary
+    function updateSummary(logs) {
+      let totalDistance = 0;
+      let totalFuel = 0;
+      let totalCost = 0;
+      logs.forEach(log => {
+        totalDistargin-bottom: 1rem;
+    }
+    #log
+    // Update summary
+    function updateSummary(logs) {
+      let totalDistance = 0;
+      let totalFuel = 0;
+      let totalCost = 0;
+      logs.forEach(log => {
+        totalDistance += parseFloat(log.distance) || 0;
+        totalFuel += parseFloat(log.fuel) || 0;
+        totalCost += parseFloat(log.cost) || 0;
+      });
+      summaryEl.innerHTML = `
+        <h2>サマリー</h2>
+        <p>記録件数: ${logs.length}</p>
+        <p>総走行距離: ${totalDistance.toFixed(1)} km</p>
+        <p>総燃料: ${totalFuel.toFixed(1)} L</p>
+        <p>総経費: ${totalCost.toFixed(0)} 円</p>
+      `;
+    }
+
+    // Save log
+    form.addEventListener('submit', e => {
       e.preventDefault();
       const log = {
         date: document.getElementById('date').value,
+        start: document.getElementById('start').value,
+        destination: document.getElementById('destination').value,
         distance: document.getElementById('distance').value,
         weight: document.getElementById('weight').value,
         fuel: document.getElementById('fuel').value,
@@ -79,16 +299,33 @@
       form.reset();
       loadLogs();
     });
-    logsContainer.addEventListener('click', (e) => {
+
+    // Delete log entry
+    logsContainer.addEventListener('click', e => {
       if (e.target.tagName === 'BUTTON') {
-        const idx = e.target.getAttribute('data-index');
+        const idx = parseInt(e.target.getAttribute('data-index'));
         const logs = JSON.parse(localStorage.getItem('runLogs') || '[]');
         logs.splice(idx, 1);
         localStorage.setItem('runLogs', JSON.stringify(logs));
         loadLogs();
       }
     });
+
+    // Navigation link generation
+    navBtn.addEventListener('click', () => {
+      const dest = navInput.value || document.getElementById('destination').value;
+      if (dest) {
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=driving`;
+        window.open(url, '_blank');
+      } else {
+        alert('目的地を入力してください');
+      }
+    });
+
+    // Initialize on load
     loadLogs();
   </script>
 </body>
 </html>
+s .log {
+      back
